@@ -4,6 +4,7 @@ from picamera2.previews.qt import QGlPicamera2
 from picamera2 import Picamera2
 from datetime import datetime
 from gpiozero import Button
+import RPi.GPIO as GPIO
 import time
 
 class CameraSystem:
@@ -31,6 +32,9 @@ class CameraSystem:
         result = self.camera.wait(job)
         self.capture_button.setEnabled(True)
         
+    def on_phys_button(self, channel):
+        print("click")
+
     def start(self):
         self.app = QApplication([])
         self.qpicamera2 =QGlPicamera2(self.camera, width=800, height=600, keep_ar=False)
@@ -46,6 +50,10 @@ class CameraSystem:
         self.window.setWindowTitle("Camera System")
         self.window.resize(640, 480)
         self.window.setLayout(self.layout_v)
+
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(7, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
 
         self.camera.start()
         self.window.show()
