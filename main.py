@@ -17,23 +17,28 @@ class CameraSystem:
         self.window = None
         self.layout_v = None
         self.set_up()
+
     def set_up(self):
         self.camera = Picamera2()
         self.camera_config = self.camera.create_still_configuration(main={"size": (1920, 1080)}, lores={"size": (640, 480)}, display="lores")
         #self.camera_config = self.camera.create_preview_configuration()
         self.camera.configure(self.camera_config)
-    def on_capture_button(self):
-        self.capture_button.setEnabled(False)
-        cfg = self.camera.create_still_configuration()
+
+    def capture_file_request(self):
         timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.camera.capture_file(f"out/img_{timestamp}.jpg", signal_function=self.qpicamera2.signal_done)
-        #self.camera.switch_mode_and_capture_file(cfg, f"out/test_{timestamp}.jpg", signal_function=self.qpicamera2.signal_done)
+
+    def on_capture_button(self):
+        self.capture_button.setEnabled(False)
+        self.capture_file_request()
+
     def capture_done(self, job):
         result = self.camera.wait(job)
         self.capture_button.setEnabled(True)
         
     def on_phys_button(self, channel):
         print("click")
+        self.capture_file_request()
 
     def start(self):
         self.app = QApplication([])
