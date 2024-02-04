@@ -24,7 +24,7 @@ The case for this camera is not mine, I printed Pikon Camera 3D model from [here
 
 - The steps for 3D printing are
 
-1. Download the Crealty Print Software app image from [here](./res/3d-print/Creality_Print-v3.11.1-Ubutu-x86_64-Release.AppImage). Since it's a portable software, you don't need to install what you download.
+1. Download the Creality Print Software app image from [here](https://www.creality.com/pages/download-software). Since it's a portable software, you don't need to install what you download.
 
 2. Give execution permissions to the `.AppImage` file you downloaded:
 
@@ -60,4 +60,90 @@ chmod +x ./Creality_Print-v3.11.1-Ubutu-x86_64-Release.AppImage
 
 ## Set Up
 
-TBD
+You must download the OS version: `2022-01-28-raspios-bullseye-arm64-full` from [here](https://downloads.raspberrypi.com/raspios_full_arm64/images/).
+
+1. Plug your Micro SD Card into your pc and check its name:
+
+```
+sudo fdisk -l
+```
+
+2. Unmount the card. Since my card has another OS burned already, it has two partitions (shown in above command), so I unmounted both:
+
+```
+sudo umount /dev/sdb1
+sudo umount /dev/sdb2
+```
+
+3. Burn the image onto the Micro SD Card
+
+```
+sudo dd bs=4M if=~/Downloads/2022-01-28-raspios-bullseye-arm64-full.img of=/dev/sdb status=progress
+sync
+sudo eject /dev/sdb
+```
+
+## OS Configs
+
+1. Install libcamera by either of the two ways:
+
+a) From source
+
+```
+git clone https://github.com/raspberrypi/libcamera.git
+cd libcamera/
+mkdir build
+cd build
+cmake ..
+cd ..
+meson setup build
+sudo apt install meson
+meson setup build
+ninja -C build install
+libcamera
+```
+
+b) With the package manager
+
+```
+sudo apt install libcamera-apps
+sudo apt-install -y python3-pyqt5 python3-opengl python3-picamera2
+```
+
+2. Open firmware configs:
+
+```
+sudo raspi-config
+```
+
+3. Navigate to **Advance Options**  and **Enable Glamor Graphic Acceleration**. Optionally, also in **Advanced Options** you can **Enable Legacy Camera**.
+
+4. Go back to **Advanced Options** and navigate to **GL Driver**, select **GL (Full KMS)**
+
+5. Reboot
+
+```
+sudo reboot
+```
+
+6. Modify the config file with `sudo vim ~/boot/config.txt`:
+
+- `~/boot/config.txt`: Make sure this is under the `[all]` section:
+
+```
+...
+[all]
+gpu_mem=128
+camera_auto_detect=0
+dtoverlay=imx477
+```
+
+Also, uncomment the line with `dtoverlay=vc4-kms-v3d`.
+
+7. Show a preview of the camera image:
+
+```
+libcamera-still -t 0
+```
+
+**Important:** if the preview shows an all-black image, try adjusting all the lens' lighting, since often times the configs are all messed up. Twist the lens.

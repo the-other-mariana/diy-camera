@@ -105,15 +105,7 @@
   105  vim main.py
   106  python3 main.py
   107  git init
-  108  git add .
-  109  git commit -s -m 'update: proof of concept script'
-  110  git config --global user.email "mariana.avalos.arce@gmail.com"
-  111  git config --global user.name "the-other-mariana"
-  112  cd ~
-  113  mkdir -p ~/.ssh
-  114  cd .ssh
-  115  ssh-keygen -o -t rsa -C "mariana.avalos.arce@gmail.com"
-  116  cat id_rsa.pub 
+  108  git add 
   117  cd ~/Documents/github//diy-camera/
   118  git add .
   119  git commit -s -m 'update: proof of concept script'
