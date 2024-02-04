@@ -96,7 +96,6 @@ class Window2(QtWidgets.QWidget):
             self.current_node = self.current_node.prev
             #self.show_image(self.image_files[self.current_image_view])
             self.show_image(self.current_node.data)
-            print(self.current_node.data)
 
     def on_next(self):
         print("next")
@@ -109,10 +108,11 @@ class Window2(QtWidgets.QWidget):
         print("upload")
 
     def on_delete(self):
-        data_to_delete = self.current_node.data
+        node_to_delete = self.current_node
         if self.current_node.prev != None:
             self.current_node = self.current_node.prev
-        self.dll.delete_node(data_to_delete)
+        self.dll.delete_node(node_to_delete)
+        self.show_image(self.current_node.data)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
