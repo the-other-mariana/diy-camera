@@ -122,7 +122,8 @@ class Window2(QtWidgets.QWidget):
                 self.show_no_image()
 
         self.dll.delete_node(node_to_delete)
-        self.show_image(self.current_node.data)
+        if self.current_node != None:
+            self.show_image(self.current_node.data)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
