@@ -66,8 +66,8 @@ class Window2(QtWidgets.QWidget):
         self.image_files = self.get_image_files(folder_path)
         if self.image_files:
             #self.show_image(self.image_files[-1])
-            self.show_image(self.dll.head.data)
-            self.current_node = self.dll.head
+            self.show_image(self.dll.tail.data)
+            self.current_node = self.dll.tail
             print(self.current_node.data)
 
     def get_image_files(self, folder_path):
