@@ -92,13 +92,11 @@ class Window2(QtWidgets.QWidget):
         print("back")
         if self.current_node.prev != None:
             self.current_node = self.current_node.prev
-            #self.show_image(self.image_files[self.current_image_view])
             self.show_image(self.current_node.data)
 
     def on_next(self):
         print("next")
         if self.current_node.next != None:
-            #self.current_image_view += 1
             self.current_node = self.current_node.next
             self.show_image(self.current_node.data)
 
