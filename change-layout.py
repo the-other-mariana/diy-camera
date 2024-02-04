@@ -88,15 +88,18 @@ class Window2(QtWidgets.QWidget):
         self.image_label.setPixmap(pixmap)
         self.image_label.setScaledContents(True)
 
+    def show_no_image(self):
+        self.image_label.setText("No Images")
+
     def on_back(self):
         print("back")
-        if self.current_node.prev != None:
+        if self.current_node != None and self.current_node.prev != None:
             self.current_node = self.current_node.prev
             self.show_image(self.current_node.data)
 
     def on_next(self):
         print("next")
-        if self.current_node.next != None:
+        if self.current_node != None and self.current_node.next != None:
             self.current_node = self.current_node.next
             self.show_image(self.current_node.data)
 
@@ -107,6 +110,17 @@ class Window2(QtWidgets.QWidget):
         node_to_delete = self.current_node
         if self.current_node.prev != None:
             self.current_node = self.current_node.prev
+        else: 
+            # we want to delete the first element
+            if self.current_node.next != None:
+                # its the only case where the user will see the next after deletion
+                self.current_node = self.current_node.next
+            else:
+                # case: the node has no prev and no next (one picture only)
+                # dll will handle refs
+                self.current_node = None
+                self.show_no_image()
+
         self.dll.delete_node(node_to_delete)
         self.show_image(self.current_node.data)
 

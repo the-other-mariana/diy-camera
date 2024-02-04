@@ -14,16 +14,20 @@ class DoublyLinkedList:
         if self.head is None or node_to_delete is None: 
             return
     
-        # case: the node is the last one
-        if self.tail == node_to_delete: 
-            node_to_delete.prev.next = self.head
-            self.tail = node_to_delete.prev
+        # case: we want to delete the only node
+        if self.head == node_to_delete and self.tail == node_to_delete:
+            self.tail = None
+            self.head = None
+        else:
+            # case: the node is the last one
+            if self.tail == node_to_delete: 
+                node_to_delete.prev.next = None
+                self.tail = node_to_delete.prev
 
-
-        # case: the node is the first one
-        if self.head == node_to_delete:
-            node_to_delete.prev.prev = self.tail
-            self.head = node_to_delete.next
+            # case: the node is the first one
+            if self.head == node_to_delete:
+                node_to_delete.next.prev = None
+                self.head = node_to_delete.next
 
         # case: normal
         # modify the node's next ref
