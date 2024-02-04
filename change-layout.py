@@ -60,9 +60,7 @@ class Window2(QtWidgets.QWidget):
         self.button.clicked.connect(lambda: stacked_widget.setCurrentIndex(0))
         button_layout.addWidget(self.button)
 
-        main_layout.addLayout(button_layout)
-
-        
+        main_layout.addLayout(button_layout)        
 
     def load_images_from_folder(self, folder_path):
         self.image_files = self.get_image_files(folder_path)
