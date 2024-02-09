@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QDir
 from DoublyLinkedList import Node, DoublyLinkedList
+import sys
+
 
 class Window1(QtWidgets.QWidget):
     def __init__(self, stacked_widget):
@@ -140,7 +142,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
 if __name__ == '__main__':
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
