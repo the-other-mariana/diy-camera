@@ -32,6 +32,8 @@ class Window1(QtWidgets.QWidget):
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.go_to_window2_button)
 
+        self.setFixedSize(640, 480)
+
     def handleButton(self):
         sender_button = self.sender()
         if sender_button:
@@ -69,7 +71,8 @@ class Window2(QtWidgets.QWidget):
         button_layout.addWidget(self.button)
 
         main_layout.addLayout(button_layout)
-        self.resize(640, 480)
+
+        self.setFixedSize(640, 480)
 
     def load_images_from_folder(self, folder_path):
         self.image_files = self.get_image_files(folder_path)
