@@ -9,6 +9,13 @@ from DoublyLinkedList import Node, DoublyLinkedList
 import RPi.GPIO as GPIO
 import time
 import sys
+import os
+
+WINDOW_WIDTH = 640
+WINDOW_HEIGHT = 480
+
+CAMERA_STILL_WIDTH = 640
+CAMERA_STILL_HEIGHT = 480
 
 class Window1(QtWidgets.QWidget):
     def __init__(self, stacked_widget, picameraView):
@@ -24,7 +31,7 @@ class Window1(QtWidgets.QWidget):
             button.clicked.connect(self.handleButton)
             button_layout.addWidget(button)
 
-        self.go_to_window2_button = QtWidgets.QPushButton('Go To Window 2')
+        self.go_to_window2_button = QtWidgets.QPushButton('Camera Roll')
         self.go_to_window2_button.clicked.connect(lambda: stacked_widget.setCurrentIndex(1))
 
         main_layout = QtWidgets.QVBoxLayout(self)
@@ -32,7 +39,7 @@ class Window1(QtWidgets.QWidget):
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.go_to_window2_button)
 
-        self.setFixedSize(640, 480)
+        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
     def handleButton(self):
         sender_button = self.sender()
@@ -72,7 +79,7 @@ class Window2(QtWidgets.QWidget):
 
         main_layout.addLayout(button_layout)
 
-        self.setFixedSize(640, 480)
+        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
     def load_images_from_folder(self, folder_path):
         self.image_files = self.get_image_files(folder_path)
@@ -136,6 +143,12 @@ class Window2(QtWidgets.QWidget):
         self.dll.delete_node(node_to_delete)
         if self.current_node != None:
             self.show_image(self.current_node.data)
+        try:
+            os.remove(node_to_delete.data)
+        except FileNotFoundError:
+            print(f"[ERROR] File {node_to_delete.data} not found. Couldn't delete.")
+        except Exception as e:
+            print(f"[ERROR] Couldnt't delete file {node_to_delete.data}: {e}")
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -153,7 +166,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #central_widget = QtWidgets.QWidget()
         #central_widget.setLayout(layout)
         self.setCentralWidget(self.stacked_widget)
-        self.resize(640, 480)
+        self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 class CameraSystem:
     def __init__(self):
@@ -168,7 +181,7 @@ class CameraSystem:
 
     def set_up(self):
         self.camera = Picamera2()
-        self.camera_config = self.camera.create_still_configuration(main={"size": (1920, 1080)}, lores={"size": (640, 480)}, display="lores")
+        self.camera_config = self.camera.create_still_configuration(main={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, lores={"size": (640, 480)}, display="lores")
         #self.camera_config = self.camera.create_preview_configuration()
         self.camera.configure(self.camera_config)
 
@@ -190,7 +203,7 @@ class CameraSystem:
 
     def start(self):
         self.app = QApplication(sys.argv)
-        self.qpicamera2 =QGlPicamera2(self.camera, width=800, height=600, keep_ar=False)
+        self.qpicamera2 =QGlPicamera2(self.camera, width=640, height=480, keep_ar=False)
         self.capture_button = QPushButton("Capture")
         self.window = QWidget()
         self.qpicamera2.done_signal.connect(self.capture_done)
@@ -210,7 +223,6 @@ class CameraSystem:
 
         self.camera.start()
         self.window = MainWindow(self.qpicamera2)
-        self.window.resize(640, 480)
         self.window.show()
         sys.exit(self.app.exec())
 
