@@ -18,26 +18,55 @@ CAMERA_STILL_WIDTH = 640
 CAMERA_STILL_HEIGHT = 480
 
 class Window1(QtWidgets.QWidget):
-    def __init__(self, stacked_widget, picameraView):
+    def set_up_camera(self):
+        self.camera = Picamera2()
+        self.camera_config = self.camera.create_still_configuration(main={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, lores={"size": (640, 480)}, display="lores")
+        #self.camera_config = self.camera.create_preview_configuration()
+        self.camera.configure(self.camera_config)
+
+    def capture_file_request(self):
+        timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.camera.capture_file(f"out/img_{timestamp}.jpg", signal_function=self.qpicamera2.signal_done)
+
+    def on_capture_button(self):
+        self.capture_button.setEnabled(False)
+        self.capture_file_request()
+
+    def capture_done(self, job):
+        result = self.camera.wait(job)
+        self.capture_button.setEnabled(True)
+        
+    def on_phys_button(self, channel):
+        print("click")
+        self.capture_file_request()
+
+    def set_up_attributes(self):
+        self.qpicamera2 =QGlPicamera2(self.camera, width=640, height=480, keep_ar=False)
+        self.capture_button = QPushButton("Capture")
+        self.qpicamera2.done_signal.connect(self.capture_done)
+        self.capture_button.clicked.connect(self.on_capture_button)
+
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(7, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
+        
+        self.camera.start()
+
+    def __init__(self, stacked_widget):
         super(Window1, self).__init__()
-
-        self.label = QtWidgets.QLabel("Welcome to Window 1")
-        self.label.setAlignment(Qt.AlignCenter)
-
-        button_layout = QtWidgets.QHBoxLayout()
-
-        for i in range(1, 5):
-            button = QtWidgets.QPushButton(f'Button {i}')
-            button.clicked.connect(self.handleButton)
-            button_layout.addWidget(button)
+        self.set_up_camera()
+        self.set_up_attributes()
 
         self.go_to_window2_button = QtWidgets.QPushButton('Camera Roll')
         self.go_to_window2_button.clicked.connect(lambda: stacked_widget.setCurrentIndex(1))
 
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addWidget(self.capture_button)
+        button_layout.addWidget(self.go_to_window2_button)
+
         main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.addWidget(picameraView)
+        main_layout.addWidget(self.qpicamera2)
         main_layout.addLayout(button_layout)
-        main_layout.addWidget(self.go_to_window2_button)
 
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
@@ -152,12 +181,12 @@ class Window2(QtWidgets.QWidget):
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, picameraView):
+    def __init__(self):
         super(MainWindow, self).__init__()
 
         self.stacked_widget = QtWidgets.QStackedWidget(self)
 
-        self.window1 = Window1(self.stacked_widget, picameraView)
+        self.window1 = Window1(self.stacked_widget)
         self.window2 = Window2(self.stacked_widget)
 
         self.stacked_widget.addWidget(self.window1)
@@ -170,59 +199,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class CameraSystem:
     def __init__(self):
-        self.camera = None
-        self.camera_config = None
-        self.qpicamera2 = None
-        self.app = None
-        self.capture_button = None
         self.window = None
-        self.layout_v = None
-        self.set_up()
 
-    def set_up(self):
-        self.camera = Picamera2()
-        self.camera_config = self.camera.create_still_configuration(main={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, lores={"size": (640, 480)}, display="lores")
-        #self.camera_config = self.camera.create_preview_configuration()
-        self.camera.configure(self.camera_config)
-
-    def capture_file_request(self):
-        timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.camera.capture_file(f"out/img_{timestamp}.jpg", signal_function=self.qpicamera2.signal_done)
-
-    def on_capture_button(self):
-        self.capture_button.setEnabled(False)
-        self.capture_file_request()
-
-    def capture_done(self, job):
-        result = self.camera.wait(job)
-        self.capture_button.setEnabled(True)
-        
-    def on_phys_button(self, channel):
-        print("click")
-        self.capture_file_request()
-
-    def start(self):
-        self.app = QApplication(sys.argv)
-        self.qpicamera2 =QGlPicamera2(self.camera, width=640, height=480, keep_ar=False)
-        self.capture_button = QPushButton("Capture")
+    def start(self): 
+        self.app = QApplication([])
         self.window = QWidget()
-        self.qpicamera2.done_signal.connect(self.capture_done)
-        self.capture_button.clicked.connect(self.on_capture_button)
 
-        self.layout_v = QVBoxLayout()
-        self.layout_v.addWidget(self.qpicamera2)
-        self.layout_v.addWidget(self.capture_button)
-
-        #self.window.setWindowTitle("Camera System")
-        #self.window.resize(640, 480)
-        #self.window.setLayout(self.layout_v)
-
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(7, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
-
-        self.camera.start()
-        self.window = MainWindow(self.qpicamera2)
+        self.window = MainWindow()
         self.window.show()
         sys.exit(self.app.exec())
 
