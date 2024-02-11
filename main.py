@@ -26,7 +26,9 @@ class Window1(QtWidgets.QWidget):
 
     def capture_file_request(self):
         timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.camera.capture_file(f"out/img_{timestamp}.jpg", signal_function=self.qpicamera2.signal_done)
+        filename = f"./out/img_{timestamp}.jpg"
+        self.camera.capture_file(filename, signal_function=self.qpicamera2.signal_done)
+        self.main_window.dll.push(filename)
 
     def on_capture_button(self):
         self.capture_button.setEnabled(False)
@@ -52,8 +54,10 @@ class Window1(QtWidgets.QWidget):
         
         self.camera.start()
 
-    def __init__(self, stacked_widget):
+    def __init__(self, stacked_widget, main_window):
         super(Window1, self).__init__()
+
+        self.main_window = main_window
         self.set_up_camera()
         self.set_up_attributes()
 
@@ -76,9 +80,10 @@ class Window1(QtWidgets.QWidget):
             print(f'Button "{sender_button.text()}" clicked!')
 
 class Window2(QtWidgets.QWidget):
-    def __init__(self, stacked_widget):
+    def __init__(self, stacked_widget, main_window):
         super(Window2, self).__init__()
-
+        
+        self.main_window = main_window
         self.image_label = QtWidgets.QLabel()
         self.load_images_from_folder("out")
 
@@ -111,23 +116,25 @@ class Window2(QtWidgets.QWidget):
         main_layout.addLayout(button_layout)
 
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        
+        print(f'main window {main_window.dll.size}')
 
     def handle_active_window(self, index):
         print(f'current window {index}')
         if index == 1:
-            if self.dll != None:
+            if self.main_window.dll != None:
                 image_files = self.get_image_files_only("out")
-                if self.dll.size < len(image_files):
-                    for new_file in image_files[self.dll.size:]:
-                        self.dll.push(new_file)
-                self.current_node = self.dll.tail
+                if self.main_window.dll.size < len(image_files):
+                    for new_file in image_files[self.main_window.dll.size:]:
+                        self.main_window.dll.push(new_file)
+                self.current_node = self.main_window.dll.tail
                 self.show_image(self.current_node.data)
 
     def load_images_from_folder(self, folder_path):
         self.image_files = self.get_image_files_and_dll(folder_path)
         if self.image_files:
-            self.show_image(self.dll.tail.data)
-            self.current_node = self.dll.tail
+            self.show_image(self.main_window.dll.tail.data)
+            self.current_node = self.main_window.dll.tail
             print(self.current_node.data)
 
     def get_image_files_only(self, folder_path):
@@ -138,15 +145,14 @@ class Window2(QtWidgets.QWidget):
 
     def get_image_files_and_dll(self, folder_path):
         image_files = []
-        self.dll = DoublyLinkedList() 
+        #self.dll = DoublyLinkedList() 
 
         dir = QDir(folder_path)
         dir.setNameFilters(['*.jpg', '*.png', '*.jpeg'])
         for file_info in dir.entryInfoList():
             if file_info.isFile():
                 image_files.append(file_info.filePath())
-                self.dll.push(file_info.filePath())
-
+                self.main_window.dll.push(file_info.filePath())
         return image_files
     
     def show_image(self, image_path):
@@ -187,7 +193,7 @@ class Window2(QtWidgets.QWidget):
                 self.current_node = None
                 self.show_no_image()
 
-        self.dll.delete_node(node_to_delete)
+        self.main_window.dll.delete_node(node_to_delete)
         if self.current_node != None:
             self.show_image(self.current_node.data)
         try:
@@ -204,8 +210,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stacked_widget = QtWidgets.QStackedWidget(self)
 
-        self.window1 = Window1(self.stacked_widget)
-        self.window2 = Window2(self.stacked_widget)
+        self.dll = DoublyLinkedList()
+
+        self.window1 = Window1(self.stacked_widget, self)
+        self.window2 = Window2(self.stacked_widget, self)
 
         self.stacked_widget.addWidget(self.window1)
         self.stacked_widget.addWidget(self.window2)
