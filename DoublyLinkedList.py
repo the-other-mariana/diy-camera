@@ -8,6 +8,7 @@ class DoublyLinkedList:
     def __init__(self):
         self.tail = None
         self.head = None
+        self.size = 0
 
     def delete_node(self, node_to_delete):
         # case: empty list
@@ -38,6 +39,7 @@ class DoublyLinkedList:
         # modify the node's prev ref
         if node_to_delete.prev != None and node_to_delete.next != None: 
             node_to_delete.prev.next = node_to_delete.next
+        self.size -= 1
 
     def push(self, new_data): 
         new_node = Node(new_data)
@@ -52,3 +54,10 @@ class DoublyLinkedList:
             self.tail.next = new_node 
 
         self.tail = new_node
+        self.size += 1
+
+    def print_dll(self):
+        curr_node = self.head
+        while curr_node != None:
+            print(f'None: data-> {curr_node.data}')
+            curr_node = curr_node.next

@@ -106,19 +106,37 @@ class Window2(QtWidgets.QWidget):
         self.button.clicked.connect(lambda: stacked_widget.setCurrentIndex(0))
         button_layout.addWidget(self.button)
 
+        stacked_widget.currentChanged.connect(self.handle_active_window)
+
         main_layout.addLayout(button_layout)
 
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+    def handle_active_window(self, index):
+        print(f'current window {index}')
+        if index == 1:
+            if self.dll != None:
+                image_files = self.get_image_files_only("out")
+                if self.dll.size < len(image_files):
+                    for new_file in image_files[self.dll.size:]:
+                        self.dll.push(new_file)
+                self.current_node = self.dll.tail
+                self.show_image(self.current_node.data)
+
     def load_images_from_folder(self, folder_path):
-        self.image_files = self.get_image_files(folder_path)
+        self.image_files = self.get_image_files_and_dll(folder_path)
         if self.image_files:
-            #self.show_image(self.image_files[-1])
             self.show_image(self.dll.tail.data)
             self.current_node = self.dll.tail
             print(self.current_node.data)
 
-    def get_image_files(self, folder_path):
+    def get_image_files_only(self, folder_path):
+        dir = QDir(folder_path)
+        dir.setNameFilters(['*.jpg', '*.png', '*.jpeg'])
+        image_files = [f.filePath() for f in dir.entryInfoList() if f.isFile()]
+        return image_files
+
+    def get_image_files_and_dll(self, folder_path):
         image_files = []
         self.dll = DoublyLinkedList() 
 
