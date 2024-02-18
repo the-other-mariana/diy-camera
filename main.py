@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtCore import Qt, QDir
+from PyQt5.QtCore import Qt, QDir, QTimer
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QWidget
 from picamera2.previews.qt import QGlPicamera2
 from picamera2 import Picamera2
@@ -31,6 +31,12 @@ class Window1(QtWidgets.QWidget):
         filename = f"./out/img_{timestamp}.jpg"
         self.camera.capture_file(filename, signal_function=self.qpicamera2.signal_done)
         self.main_window.dll.push(filename)
+
+        self.picture_taken_widget.setVisible(True)
+        QTimer.singleShot(300, self.hide_picture_taken_widget)
+
+    def hide_picture_taken_widget(self):
+        self.picture_taken_widget.setVisible(False)
 
     def on_capture_button(self):
         self.capture_button.setEnabled(False)
@@ -73,6 +79,12 @@ class Window1(QtWidgets.QWidget):
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.addWidget(self.qpicamera2)
         main_layout.addLayout(button_layout)
+
+        self.picture_taken_widget = QtWidgets.QLabel(self.qpicamera2)
+        self.picture_taken_widget.setGeometry(self.rect())
+        self.picture_taken_widget.setStyleSheet("background-color: rgba(0, 0, 0, 255);")
+        self.picture_taken_widget.setVisible(False)
+
 
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
