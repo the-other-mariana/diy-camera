@@ -16,6 +16,10 @@ WINDOW_HEIGHT = 480
 
 CAMERA_STILL_WIDTH = 640
 CAMERA_STILL_HEIGHT = 480
+
+# UI
+WINDOW1_BUTTON_HEIGHT = 30
+
 # pin number is pin number, not gpio
 CAPTURE_BUTTON_GPIO_PIN = 36
 
@@ -117,7 +121,7 @@ class Window2(QtWidgets.QWidget):
         next_button.clicked.connect(self.on_next)
         button_layout.addWidget(next_button)
 
-        delete_button = QtWidgets.QPushButton(f'Trash')
+        delete_button = QtWidgets.QPushButton('Delete')
         delete_button.clicked.connect(self.on_delete)
         button_layout.addWidget(delete_button)
 
