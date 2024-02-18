@@ -16,6 +16,8 @@ WINDOW_HEIGHT = 480
 
 CAMERA_STILL_WIDTH = 640
 CAMERA_STILL_HEIGHT = 480
+# pin number is pin number, not gpio
+CAPTURE_BUTTON_GPIO_PIN = 36
 
 class Window1(QtWidgets.QWidget):
     def set_up_camera(self):
@@ -49,8 +51,8 @@ class Window1(QtWidgets.QWidget):
         self.capture_button.clicked.connect(self.on_capture_button)
 
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(7, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
+        GPIO.setup(CAPTURE_BUTTON_GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(CAPTURE_BUTTON_GPIO_PIN, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
         
         self.camera.start()
 
