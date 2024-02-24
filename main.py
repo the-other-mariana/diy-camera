@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtCore import Qt, QDir, QTimer
+from PyQt5.QtCore import Qt, QDir, QTimer, QThread, QMetaObject, pyqtSlot
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QWidget
 from picamera2.previews.qt import QGlPicamera2
 from picamera2 import Picamera2
@@ -10,9 +10,10 @@ import RPi.GPIO as GPIO
 import time
 import sys
 import os
+import PyQt5.QtCore
 
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 480
+WINDOW_WIDTH = 480
+WINDOW_HEIGHT = 260
 
 CAMERA_STILL_WIDTH = 640
 CAMERA_STILL_HEIGHT = 480
@@ -37,7 +38,13 @@ class Window1(QtWidgets.QWidget):
         self.main_window.dll.push(filename)
 
         self.picture_taken_widget.setVisible(True)
-        QTimer.singleShot(300, self.hide_picture_taken_widget)
+        QMetaObject.invokeMethod(self,"start_timer", Qt.QueuedConnection)
+
+    @pyqtSlot()     
+    def start_timer(self):
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.hide_picture_taken_widget)
+        self.timer.start(300)
 
     def hide_picture_taken_widget(self):
         self.picture_taken_widget.setVisible(False)
