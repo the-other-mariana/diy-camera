@@ -26,9 +26,12 @@ CAPTURE_BUTTON_GPIO_PIN = 36
 # move left right up down button pins
 BUTTON_PINS = [12, 16, 18, 32]
 
+MAIN_STYLE = "background-color: black; color: white;"
 FOCUSED_BUTTON_STYLE = """
                             QPushButton:focus {
-                                border: 3px solid green;
+                                color: white;
+                                background-color: black;
+                                border: 3px solid white;
                                 font-weight: bold;
                             }
                         """
@@ -299,7 +302,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
 
         self.stacked_widget = QtWidgets.QStackedWidget(self)
-
+        self.setStyleSheet(MAIN_STYLE)
         self.dll = DoublyLinkedList()
         self.current_window = 0
 
