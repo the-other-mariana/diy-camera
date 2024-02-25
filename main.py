@@ -23,6 +23,15 @@ WINDOW1_BUTTON_HEIGHT = 30
 
 # pin number is pin number, not gpio
 CAPTURE_BUTTON_GPIO_PIN = 36
+# move left right up down button pins
+BUTTON_PINS = [12, 16, 18, 32]
+
+FOCUSED_BUTTON_STYLE = """
+                            QPushButton:focus {
+                                border: 3px solid green;
+                                font-weight: bold;
+                            }
+                        """
 
 class Window1(QtWidgets.QWidget):
     def set_up_camera(self):
@@ -66,12 +75,30 @@ class Window1(QtWidgets.QWidget):
         self.capture_button = QPushButton("Capture")
         self.qpicamera2.done_signal.connect(self.capture_done)
         self.capture_button.clicked.connect(self.on_capture_button)
+        self.capture_button.setStyleSheet(FOCUSED_BUTTON_STYLE)
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(CAPTURE_BUTTON_GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(CAPTURE_BUTTON_GPIO_PIN, GPIO.FALLING, callback=self.on_phys_button, bouncetime=300)
-        
+
         self.camera.start()
+
+    def move_focus_callback_window1(self, pin):
+        button_index = BUTTON_PINS.index(pin)
+
+        if button_index == 0:
+            # left button is clicked
+            if self.current_button > 0:
+                self.current_button -= 1
+        if button_index == 1:
+            # right button is clicked
+            if self.current_button < len(self.move_focus_button_list) - 1:
+                self.current_button += 1
+        if button_index == 2:
+            # ok button is clicked
+            focused_button = QApplication.focusWidget()
+            focused_button.click()
+        self.move_focus_button_list[self.current_button].setFocus()
 
     def __init__(self, stacked_widget, main_window):
         super(Window1, self).__init__()
@@ -82,10 +109,17 @@ class Window1(QtWidgets.QWidget):
 
         self.go_to_window2_button = QtWidgets.QPushButton('Camera Roll')
         self.go_to_window2_button.clicked.connect(lambda: stacked_widget.setCurrentIndex(1))
+        self.go_to_window2_button.setStyleSheet(FOCUSED_BUTTON_STYLE)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.capture_button)
         button_layout.addWidget(self.go_to_window2_button)
+
+        self.move_focus_button_list = []
+        self.current_button = 0
+        self.move_focus_button_list.append(self.capture_button)
+        self.move_focus_button_list.append(self.go_to_window2_button)
+        self.move_focus_button_list[self.current_button].setFocus()
 
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.addWidget(self.qpicamera2)
@@ -107,7 +141,10 @@ class Window1(QtWidgets.QWidget):
 class Window2(QtWidgets.QWidget):
     def __init__(self, stacked_widget, main_window):
         super(Window2, self).__init__()
-        
+       
+        self.current_button = 0
+        self.move_focus_button_list = []
+
         self.main_window = main_window
         self.image_label = QtWidgets.QLabel()
         self.load_images_from_folder("out")
@@ -119,33 +156,61 @@ class Window2(QtWidgets.QWidget):
         back_button = QtWidgets.QPushButton(f'<-')
         back_button.clicked.connect(self.on_back)
         button_layout.addWidget(back_button)
+        self.move_focus_button_list.append(back_button)
 
         upload_button = QtWidgets.QPushButton(f'Upload')
         upload_button.clicked.connect(self.on_upload)
         button_layout.addWidget(upload_button)
+        self.move_focus_button_list.append(upload_button)
 
         next_button = QtWidgets.QPushButton(f'->')
         next_button.clicked.connect(self.on_next)
         button_layout.addWidget(next_button)
+        self.move_focus_button_list.append(next_button)
 
         delete_button = QtWidgets.QPushButton('Delete')
         delete_button.clicked.connect(self.on_delete)
         button_layout.addWidget(delete_button)
+        self.move_focus_button_list.append(delete_button)
 
         self.button = QtWidgets.QPushButton('Camera')
         self.button.clicked.connect(lambda: stacked_widget.setCurrentIndex(0))
         button_layout.addWidget(self.button)
+        self.move_focus_button_list.append(self.button)
 
         stacked_widget.currentChanged.connect(self.handle_active_window)
 
         main_layout.addLayout(button_layout)
 
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+        for button in self.move_focus_button_list:
+            button.setStyleSheet(FOCUSED_BUTTON_STYLE)
+        self.move_focus_button_list[self.current_button].setFocus()
         
         print(f'main window {main_window.dll.size}')
 
+    def move_focus_callback_window2(self, pin):
+        button_index = BUTTON_PINS.index(pin)
+
+        if button_index == 0:
+            # left button is clicked
+            if self.current_button > 0:
+                self.current_button -= 1
+        if button_index == 1:
+            # right button is clicked
+            if self.current_button < len(self.move_focus_button_list) - 1:
+                self.current_button += 1
+        if button_index == 2:
+            # ok button is clicked
+            focused_button = QApplication.focusWidget()
+            focused_button.click()
+        self.move_focus_button_list[self.current_button].setFocus()
+
+
     def handle_active_window(self, index):
-        print(f'current window {index}')
+        self.main_window.current_window = index
+        print(f'window: {self.main_window.current_window}')
         if index == 1:
             if self.main_window.dll != None:
                 image_files = self.get_image_files_only("out")
@@ -236,9 +301,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stacked_widget = QtWidgets.QStackedWidget(self)
 
         self.dll = DoublyLinkedList()
+        self.current_window = 0
 
         self.window1 = Window1(self.stacked_widget, self)
         self.window2 = Window2(self.stacked_widget, self)
+
+        GPIO.setmode(GPIO.BOARD)
+
+        for pin in BUTTON_PINS:
+            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.add_event_detect(pin, GPIO.FALLING, callback=self.move_focus_callback, bouncetime=300)
+
 
         self.stacked_widget.addWidget(self.window1)
         self.stacked_widget.addWidget(self.window2)
@@ -247,6 +320,12 @@ class MainWindow(QtWidgets.QMainWindow):
         #central_widget.setLayout(layout)
         self.setCentralWidget(self.stacked_widget)
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    def move_focus_callback(self, pin):
+        if self.current_window == 0:
+            self.window1.move_focus_callback_window1(pin)
+        if self.current_window == 1:
+            self.window2.move_focus_callback_window2(pin)
 
 class CameraSystem:
     def __init__(self):
