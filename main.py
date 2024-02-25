@@ -24,7 +24,7 @@ WINDOW1_BUTTON_HEIGHT = 30
 # pin number is pin number, not gpio
 CAPTURE_BUTTON_GPIO_PIN = 36
 # move left right up down button pins
-BUTTON_PINS = [11, 13, 15, 17]
+BUTTON_PINS = [12, 16, 18, 32]
 
 FOCUSED_BUTTON_STYLE = """
                             QPushButton:focus {
