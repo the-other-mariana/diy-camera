@@ -15,8 +15,8 @@ import PyQt5.QtCore
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 260
 
-CAMERA_STILL_WIDTH = 640
-CAMERA_STILL_HEIGHT = 480
+CAMERA_STILL_WIDTH = WINDOW_WIDTH
+CAMERA_STILL_HEIGHT = WINDOW_HEIGHT
 
 # UI
 WINDOW1_BUTTON_HEIGHT = 30
@@ -36,7 +36,7 @@ FOCUSED_BUTTON_STYLE = """
 class Window1(QtWidgets.QWidget):
     def set_up_camera(self):
         self.camera = Picamera2()
-        self.camera_config = self.camera.create_still_configuration(main={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, lores={"size": (640, 480)}, display="lores")
+        self.camera_config = self.camera.create_still_configuration(main={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, lores={"size": (CAMERA_STILL_WIDTH, CAMERA_STILL_HEIGHT)}, display="lores")
         #self.camera_config = self.camera.create_preview_configuration()
         self.camera.configure(self.camera_config)
 
