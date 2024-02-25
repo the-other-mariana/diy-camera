@@ -9,6 +9,7 @@
 | Camera Sensor | Arducam Camera Sensor IMX477 with C-CS Adapter | ![img](./res/1.png) | [Link](https://www.amazon.com.mx/dp/B09YHN5DBY?ref=ppx_pop_mob_ap_share) |
 | Camera Lens | Arducam Zoom C-Mount Lens 8-50mm for Camera IMX477 | ![img](./res/2.png) | [Link](https://www.amazon.com.mx/dp/B08PYMBX9T?ref=ppx_pop_mob_ap_share) |
 | Ribbon Cable | FPC Ribbon Cable 22 to 15 pins, 15cm or shorter | ![img](./res/8.png) | [Link](https://www.amazon.com.mx/Arducam-extensi%C3%B3n-Raspberry-pulgadas-unidades/dp/B085RW9K13/ref=asc_df_B085RW9K13/?tag=gledskshopmx-20&linkCode=df0&hvadid=673377511327&hvpos=&hvnetw=g&hvrand=12627621543486268431&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9130911&hvtargid=pla-970838553569&psc=1&mcid=bbc16897815637ac8670aa9edfbd43d8) |
+| 3.5 inch HDMI Display | Osoyoo HDMI display 3.5 inches | ![img](./res/10.png) | [Link](https://a.co/d/3jZ4wrx)
 
 ## 3D Prints
 
@@ -147,3 +148,65 @@ libcamera-still -t 0
 ```
 
 **Important:** if the preview shows an all-black image, try adjusting all the lens' lighting, since often times the configs are all messed up. Twist the lens.
+
+## Display
+
+The display used here was at first the classic 3.5 inch GPIO-based display, but when I connected the camera module, it wouldn't work at all. I figured that the camera preview that we use inside the Qt app sends the output *directly to HDMI*. Using a GPIO-connected display would mean to copy somehow the HDMI output to anything similar, which means a delay, which means too much work. The easy way out is to buy a display that works with HDMI. Therefore, I suggest strongly to use a 3.5 inch that connects to the Pi **with HDMI**. 
+
+The display I linked here worked with the camera module but you definitely need to tweak some stuff.
+
+1. Connect your raspberry pi to the display. Now we need to install the driver for it.
+
+2. Turn on the Pi and open a terminal:
+
+```
+git clone https://github.com/osoyoo/HDMI-show.git
+```
+
+3. Give the folder the rights.
+
+```
+sudo chmod -R 777 HDMI-show
+```
+
+4. Enter the directory:
+
+```
+cd HDMI-show/
+```
+
+5. Run the script:
+
+```
+sudo ./hdmi35-480x320-show
+```
+
+This will automatically reboot your pi. In my case, the reboot didn't end up working, and left my pi with a blank screen:
+
+![img](./res/11.jpg)
+
+If, for any reason, your screen goes blank and never shows the desktop properly, you need to do this:
+
+a. Plug your SD card into a PC
+
+b. Go to boot folder
+
+c. Open in a text editor the file `/boot/config.txt`. Through the installation we just did, Osoyoo adds these lines to your original `config.txt` file:
+
+```
+dtoverlay=vc4-fkms-v3d
+hdmi_group=2
+hdmi_mode=87
+hdmi_drive=1
+hdmi_pixel_freq_limit=20000000
+hdmi_cvt 480 320 60 6 0 0 0
+dtoverlay=ads7846,cs=1,penirq=25,penirq_pull=2,speed=50000,keep_vref_on=0,swapxy=0,pmax=255,xohms=150,xmin=200,xmax=3900,ymin=200,ymax=3900
+```
+
+In my raspberry pi 3b+ model, I needed to comment the line:
+
+```
+#hdmi_pixel_freq_limit=20000000
+```
+
+For it to work again. That's it. You can visit the driver's repo here to know what else goes under the hood [here](https://github.com/osoyoo/HDMI-Show/blob/main/hdmi35-480x320-show).
