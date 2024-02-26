@@ -13,7 +13,7 @@ import os
 import PyQt5.QtCore
 
 WINDOW_WIDTH = 480
-WINDOW_HEIGHT = 260
+WINDOW_HEIGHT = 280
 
 CAMERA_STILL_WIDTH = WINDOW_WIDTH
 CAMERA_STILL_HEIGHT = WINDOW_HEIGHT
@@ -322,7 +322,11 @@ class MainWindow(QtWidgets.QMainWindow):
         #central_widget = QtWidgets.QWidget()
         #central_widget.setLayout(layout)
         self.setCentralWidget(self.stacked_widget)
-        self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        #self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.setGeometry(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        flags = Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
+        
 
     def move_focus_callback(self, pin):
         if self.current_window == 0:
