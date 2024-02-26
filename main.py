@@ -12,8 +12,10 @@ import sys
 import os
 import PyQt5.QtCore
 
+OUT_PATH = "/home/pi/Documents/github/diy-camera/out"
+
 WINDOW_WIDTH = 480
-WINDOW_HEIGHT = 280
+WINDOW_HEIGHT = 320
 
 CAMERA_STILL_WIDTH = WINDOW_WIDTH
 CAMERA_STILL_HEIGHT = WINDOW_HEIGHT
@@ -45,7 +47,7 @@ class Window1(QtWidgets.QWidget):
 
     def capture_file_request(self):
         timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"./out/img_{timestamp}.jpg"
+        filename = f"{OUT_PATH}/img_{timestamp}.jpg"
         self.camera.capture_file(filename, signal_function=self.qpicamera2.signal_done)
         self.main_window.dll.push(filename)
 
@@ -150,7 +152,7 @@ class Window2(QtWidgets.QWidget):
 
         self.main_window = main_window
         self.image_label = QtWidgets.QLabel()
-        self.load_images_from_folder("out")
+        self.load_images_from_folder(OUT_PATH)
 
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.addWidget(self.image_label)
@@ -216,7 +218,7 @@ class Window2(QtWidgets.QWidget):
         print(f'window: {self.main_window.current_window}')
         if index == 1:
             if self.main_window.dll != None:
-                image_files = self.get_image_files_only("out")
+                image_files = self.get_image_files_only(OUT_PATH)
                 if self.main_window.dll.size < len(image_files):
                     for new_file in image_files[self.main_window.dll.size:]:
                         self.main_window.dll.push(new_file)
