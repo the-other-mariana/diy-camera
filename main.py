@@ -35,7 +35,7 @@ FOCUSED_BUTTON_STYLE = """
                                 font-weight: bold;
                             }
                         """
-
+log_file = open("/home/pi/main.log", 'a')
 class Window1(QtWidgets.QWidget):
     def set_up_camera(self):
         self.camera = Picamera2()
@@ -339,13 +339,18 @@ class CameraSystem:
         self.window = None
 
     def start(self): 
+        print(os.environ, file=log_file)
+        print(os.getcwd(), file=log_file)
+        log_file.flush()
         self.app = QApplication([])
         self.window = QWidget()
 
         self.window = MainWindow()
         self.window.show()
         sys.exit(self.app.exec())
-
+        log_file.close()
+        sys.stdout.flush()
+        sys.stderr.flush()
 
 def main():
     s = CameraSystem()
