@@ -210,3 +210,18 @@ In my raspberry pi 3b+ model, I needed to comment the line:
 ```
 
 For it to work again. That's it. You can visit the driver's repo here to know what else goes under the hood [here](https://github.com/osoyoo/HDMI-Show/blob/main/hdmi35-480x320-show).
+
+## Boot Configs
+
+1. In order to make the program start as the pi is turned on, you need to open the file `/etc/xdg/lxsession/LXDE-pi/autostart` and write the lines:
+
+```
+#@lxpanel --profile LXDE-pi
+#@pcmanfm --desktop --profile LXDE-pi
+@xscreensaver -no-splash
+@sudo python3 /home/pi/Documents/github/diy-camera/main.py
+``` 
+
+where the last command has the path from our `main.py` file.
+
+2. Reboot the pi and you should be able to see the program running.
