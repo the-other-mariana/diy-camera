@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt, QDir, QTimer, QThread, QMetaObject, pyqtSlot
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QWidget
 from picamera2.previews.qt import QGlPicamera2
 from picamera2 import Picamera2
-from datetime import datetime
+from datetime import datetime, timedelta
 from gpiozero import Button
 from DoublyLinkedList import Node, DoublyLinkedList
 import RPi.GPIO as GPIO
@@ -17,8 +17,8 @@ OUT_PATH = "/home/pi/Documents/github/diy-camera/out"
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 320
 
-CAMERA_STILL_WIDTH = WINDOW_WIDTH
-CAMERA_STILL_HEIGHT = WINDOW_HEIGHT
+CAMERA_STILL_WIDTH = 1920
+CAMERA_STILL_HEIGHT = 1280
 
 # UI
 WINDOW1_BUTTON_HEIGHT = 30
@@ -46,7 +46,11 @@ class Window1(QtWidgets.QWidget):
         self.camera.configure(self.camera_config)
 
     def capture_file_request(self):
-        timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        #timestamp=datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        utc_now = datetime.utcnow()
+        offset_hours = -6
+        my_datetime = utc_now + timedelta(hours=offset_hours)
+        timestamp = my_datetime.strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"{OUT_PATH}/img_{timestamp}.jpg"
         self.camera.capture_file(filename, signal_function=self.qpicamera2.signal_done)
         self.main_window.dll.push(filename)
